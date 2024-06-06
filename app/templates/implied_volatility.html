@@ -1,0 +1,156 @@
+{% extends "base.html" %}
+
+{% block title %}Implied Volatility Calculator{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row"> 
+        <div class="column text-center heading-pozicija">
+            <h2>Implied Volatility Calculator</h2>
+        </div>
+    </div>
+    <div class="row">
+        <div class="column half-width" style="justify-content: flex-end;">
+            <form method="get" action="{{ url_for('views.implied_volatility') }}" class="bsm">
+                <div class="form-group">
+                    <label for="option_type">Option Type:</label>
+                    <select class="form-control text-left option-type-select" id="option_type" name="option_type" value="{{data.option_type}}" required>
+                        <option value="call" {% if data.option_type == 'call' %}selected{% endif %}>Call Option</option>
+                        <option value="put" {% if data.option_type == 'put' %}selected{% endif %}>Put Option</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="S">Stock Price:</label>
+                    <input type="number" step="any" class="form-control" id="S" name="S"  value = "{{data.S}}" min = "0" required>
+                </div>
+                <div class="form-group">
+                    <label for="K">Strike Price:</label>
+                    <input type="number" step="any" class="form-control" id="K" name="K" value = "{{data.K}}" min = "0" required>
+                </div>
+                <div class="form-group">
+                    <label for="q">Dividend Yield (%):</label>
+                    <input type="number" step="any" class="form-control" id="q" name="q" value = "{{data.q}}" min = "0" required>
+                </div>
+                <div class="form-group">
+                    <label for="r">Risk-Free Interest Rate (%):</label>
+                    <input type="number" step="any" class="form-control" id="r" name="r" value = "{{data.r}}" required>
+                </div>
+                <div class="form-group">
+                    <label for="t">Time to expiration (in days):</label>
+                    <input type="number" step="any" class="form-control" id="t" name="t" value = "{{data.t}}"  min = "0" required>
+                </div>
+                <div class="form-group">
+                    <label for="mkt_price">Option Market Price:</label>
+                    <input type="number" step="any" class="form-control" id="mkt_price" name="mkt_price" value = "{{data.mkt_price}}"  min = "0.00001" required>
+                </div>
+            <div class="button-container-bsm">
+                <button type="submit" class="button button-primary">Calculate</button>
+            </div>
+        </form>  
+    
+    </div>
+
+    <div class="column half-width tablica-pozicija" >
+        <div class="tablica-izgled">
+        <table class="table table-hover">
+            <tbody>
+                {% if data.option_type == 'call' %}
+                <tr>
+                    <th>Implied Volatility</th>
+                    <td>{{ '{:.6f}'.format(data.output_data['implied_volatility']) }}</td>
+                </tr>
+                {% elif data.option_type == 'put' %}
+                <tr>
+                    <th>Implied Volatility</th>
+                    <td>{{ '{:.6f}'.format(data.output_data['implied_volatility']) }}</td>
+                </tr>
+                {% endif %}
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="2" class="justify-th-footer">
+                        <div class="footer-content">{{data.option_type.capitalize()}} Implied Volatility @ Stock Price: {{ data.S }}, Strike Price: {{ data.K }}, Dividend yield: {{data.q}}%, Risk-Free Interest Rate: {{data.r}}%, Time to expiration: {{data.t}} days and Option Market Price: {{data.mkt_price}}%</div>
+                    </td>
+                </tr>
+            </tfoot>
+        </table>
+        </div>  
+    </div>
+    <div class="row">
+        <div class="column text-center">
+            <div class="accordion-container">
+                <button class="accordion">Volatility Overview</button>
+                <div class="panel">
+                    <p class="model-overview">
+                        Volatility refers to the degree of variation of a financial instrument's trading price over time. It is a statistical measure of the dispersion 
+                        of returns for a given security or market index and can be measured using the standard deviation or variance between returns from that same security or market index.
+                    </p>
+                    <p class="model-overview">
+                        The standard deviation (σ), a common measure of volatility, is calculated as:
+                    </p>
+                    <p class="model-overview">
+                        \[
+                        \sigma = \sqrt{\frac{1}{N} \sum_{i=1}^{N} (R_i - \overline{R})^2}
+                        \]
+                    </p>
+                    <p class="model-overview">
+                        where:
+                    </p>
+                    <ul class="model-overview">
+                        <li>σ = Standard deviation</li>
+                        <li>N = Number of observations</li>
+                        <li>R_i = Return of the ith observation</li>
+                        <li>\(\overline{R}\) = Mean return</li>
+                    </ul>
+                    <p class="model-overview">
+                        High volatility indicates a high degree of risk and potential return, while low volatility indicates lower risk and potential return. Investors and traders use 
+                        volatility as a key factor in making decisions about buying or selling assets.
+                    </p>
+                    
+                </div>
+                <button class="accordion">Implied Volatility</button>
+                <div class="panel">
+                    <p class="model-overview">
+                        Implied volatility (IV) is a metric that captures the market's view of the likelihood of changes in a given security's price. Unlike historical volatility, which measures past market fluctuations, 
+                        implied volatility is forward-looking and reflects the market's expectations of future volatility. It is derived from the price of options in the market: the higher the price of the option, the higher the implied volatility. 
+                        IV is a critical input in options pricing models, such as the Black-Scholes model, because it helps determine the fair value of an option. When traders anticipate high volatility in the future, they are willing to pay more for options, 
+                        leading to higher implied volatility. Conversely, when they expect stable markets, the implied volatility decreases.
+                    </p>
+                    <p class="model-overview">
+                        Implied volatility does not predict the direction in which the price change will go. It only measures the magnitude of price movements. This measure is particularly useful for options traders, as it helps them gauge market sentiment 
+                        and make more informed trading decisions. A key aspect of implied volatility is that it reflects the consensus of the market participants about future price variability, incorporating all known information, including economic data, 
+                        earnings reports, and geopolitical events. Thus, implied volatility can be seen as a barometer of market sentiment and uncertainty.
+                    </p>
+                    <p class="model-overview">
+                        One common way to visualize implied volatility is through the volatility smile, which plots IV against strike prices. Typically, out-of-the-money and in-the-money options have higher implied volatilities than at-the-money options, 
+                        creating a smile-like curve. This pattern indicates that extreme price movements (either up or down) are expected to be more volatile than moderate price changes. Implied volatility is also subject to changes based on market conditions, 
+                        making it a dynamic and essential tool for options traders.
+                    </p>
+                </div>
+                
+                <button class="accordion">Newton-Raphson Method</button>
+                <div class="panel">
+                    <p class="model-overview">
+                        The Newton-Raphson method is an iterative numerical technique used to find approximate solutions to real-valued functions. In the context of implied volatility, 
+                        this method is used to find the root of the equation that equates the market price of an option with the theoretical price given by a pricing model like Black-Scholes.
+                    </p>
+                    <p class="model-overview">
+                        The Newton-Raphson method starts with an initial guess of implied volatility and iteratively improves that guess by using the following formula:
+                    </p>
+                    <p class="model-overview">
+                        \[
+                        \sigma_{n+1} = \sigma_{n} - \frac{f(\sigma_{n})}{f'(\sigma_{n})}
+                        \]
+                    </p>
+                    <p class="model-overview">
+                        where \( f(\sigma) \) is the difference between the market price of the option and the theoretical price given by the Black-Scholes formula, and \( f'(\sigma) \) is the derivative of this function with respect to \(\sigma\).
+                    </p>
+                    <p class="model-overview">
+                        This process is repeated until the value converges to an acceptable level of precision. The Newton-Raphson method is favored for its rapid convergence properties, making it a powerful tool for calculating implied volatility.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>     
+</div>
+{% endblock %}

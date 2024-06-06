@@ -1,0 +1,356 @@
+{% extends "base.html" %}
+
+{% block title %}Black-Scholes Option Pricing{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="column text-center heading-pozicija">
+            <h2>Black-Scholes-Merton Pricing Model</h2>
+        </div>
+    </div>
+    <div class="row">
+        <div class="column half-width" style="justify-content: flex-end;">
+            <form method="get" action="{{ url_for('views.black_scholes_merton') }}" class="bsm">
+                <div class="form-group">
+                    <label for="option_type">Option Type:</label>
+                    <select class="form-control text-left option-type-select" id="option_type" name="option_type" value="{{data.option_type}}" required>
+                        <option value="call" {% if data.option_type == 'call' %}selected{% endif %}>Call Option</option>
+                        <option value="put" {% if data.option_type == 'put' %}selected{% endif %}>Put Option</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="S">Stock Price:</label>
+                    <input type="number" step="any" class="form-control" id="S" name="S"  value = "{{data.S}}" min = "0" required>
+                </div>
+                <div class="form-group">
+                    <label for="K">Strike Price:</label>
+                    <input type="number" step="any" class="form-control" id="K" name="K" value = "{{data.K}}" min = "0" required>
+                </div>
+                <div class="form-group">
+                    <label for="q">Dividend Yield (%):</label>
+                    <input type="number" step="any" class="form-control" id="q" name="q" value = "{{data.q}}" min = "0" required>
+                </div>
+                <div class="form-group">
+                    <label for="r">Risk-Free Interest Rate (%):</label>
+                    <input type="number" step="any" class="form-control" id="r" name="r" value = "{{data.r}}" required>
+                </div>
+                <div class="form-group">
+                    <label for="t">Time to expiration (in days):</label>
+                    <input type="number" step="any" class="form-control" id="t" name="t" value = "{{data.t}}"  min = "0" required>
+                </div>
+                <div class="form-group">
+                    <label for="sigma">Volatility (%):</label>
+                    <input type="number" step="any" class="form-control" id="sigma" name="sigma" value = "{{data.sigma}}"  min = "0.00001" required>
+                </div>
+            <div class="button-container-bsm">
+                <button type="submit" class="button button-primary">Calculate</button>
+            </div>
+        </form>  
+    
+    </div>
+
+    <div class="column half-width tablica-pozicija" >
+        <div class="tablica-izgled">
+        <table class="table table-hover">
+            <tbody>
+                {% if data.option_type == 'call' %}
+                <tr>
+                    <th>Call price</th>
+                    <td>{{ '{:.6f}'.format(data.output_data['call_price']) }}</td>
+                </tr>
+                {% elif data.option_type == 'put' %}
+                <tr>
+                    <th>Put price</th>
+                    <td>{{ '{:.6f}'.format(data.output_data['put_price']) }}</td>
+                </tr>
+                {% endif %}
+                <tr>
+                    <th>Delta value</th>
+                    <td>
+                        {% if data.output_data['delta_value'] is number %}
+                            {{ '{:.6f}' .format(data.output_data['delta_value']) }}
+                        {% else %}
+                            {{ data.output_data['delta_value']}}
+                        {% endif %}
+                    </td>
+                </tr>
+                <tr>
+                    <th>Gamma value</th>
+                    <td>
+                        {% if data.output_data['gamma_value'] is number %}
+                            {{ '{:.6f}' .format(data.output_data['gamma_value']) }}
+                        {% else %}
+                            {{ data.output_data['gamma_value']}}
+                        {% endif %}
+                    </td>
+                </tr>
+                <tr>
+                    <th>Theta value</th>
+                    <td>
+                        {% if data.output_data['theta_value'] is number %}
+                            {{ '{:.6f}' .format(data.output_data['theta_value']) }}
+                        {% else %}
+                            {{ data.output_data['theta_value']}}
+                        {% endif %}
+                    </td>
+                </tr>
+                <tr>
+                    <th>Vega value</th>
+                    <td>
+                        {% if data.output_data['vega_value'] is number %}
+                            {{ '{:.6f}' .format(data.output_data['vega_value']) }}
+                        {% else %}
+                            {{ data.output_data['vega_value']}}
+                        {% endif %}
+                    </td>
+                </tr>
+                <tr>
+                    <th>Rho value</th>
+                    <td>
+                        {% if data.output_data['rho_value'] is number %}
+                            {{ '{:.6f}' .format(data.output_data['rho_value']) }}
+                        {% else %}
+                            {{ data.output_data['rho_value']}}
+                        {% endif %}
+                    </td>
+                </tr>
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="2" class="justify-th-footer">
+                        <div class="footer-content">{{data.option_type.capitalize()}} Price and Option Greeks @ Stock Price: {{ data.S }}, Strike Price: {{ data.K }}, Dividend yield: {{data.q}}%, Risk-Free Interest Rate: {{data.r}}%, Time to expiration: {{data.t}} days and Volatility: {{data.sigma}}%</div>
+                    </td>
+                </tr>
+            </tfoot>
+        </table>
+        </div>  
+    </div>
+    <div class="row">
+        <div class="column text-center">
+            <div class="accordion-container">
+                <button class="accordion">Overview</button>
+                <div class="panel">
+                    <p class="model-overview">The Black-Scholes-Merton model, often simply referred to as the Black-Scholes model, 
+                        represents a theoretical approach for analyzing markets of financial derivatives. Model is derived from Black-Scholes equation, 
+                        an equation which provides a method for assessing the value of options, both calls and puts.
+                    </p>
+                    <p class="model-overview">The model was first proposed by economists Fischer Black and Myron Scholes, who introduced an influential partial differential equation [1]. 
+                        Subsequently, Robert Merton expanded on their work by applying stochastic calculus, contributing to what is now recognized as the Black-Scholes-Merton formula [2]. 
+                    </p>
+                    <p class="model-overview">The model computes an option's price by determining the expected return for an investor minus the investment cost, 
+                        incorporating log-normal probability distributions to manage the volatility inherent in the underlying asset. 
+                        At its core, the Black-Scholes model provides a mathematical formula to calculate the theoretical price of European-style options. 
+                        Unlike American options, European options can only be exercised at maturity, not before. 
+                    </p>
+                    <p class="model-overview">The model assumes a lognormal distribution of stock prices, an assumption that simplifies the mathematical modeling. 
+                        The premise of log-normal returns in the model draws on Brownian motion principles, suggesting that asset prices fluctuate in a manner 
+                        akin to the random patterns observed in Brownian motion.
+                    </p>
+                    <p class="model-overview">The Black-Scholes model has had a profound impact on the financial industry. It not only facilitated the explosive growth 
+                        of options trading but also led to the development of a wide range of financial derivatives. The model's insights have been applied in risk management, 
+                        investment strategy, and even corporate finance decisions.
+                    </p>
+                    <p class="model-overview">Despite its widespread use, the model is not without its critics. The assumption of constant volatility is particularly contentious, 
+                        as real-world financial markets often exhibit volatility that varies over time. Additionally, the assumption of no dividends is restrictive for options on 
+                        stocks that pay significant dividends. Black-Scholes-Merton formula was later modified so that it takes into account dividends from dividend-paying stocks.
+                    </p>
+                    <br>
+                    <ol class="references">
+                        <li>Black, F., & Scholes, M. The Pricing of Options and Corporate Liabilities. Retrieved February 18, 2024, from http://www.jstor.org/stable/1831029</li>
+                        <li>Merton, R. Theory of Rational Option Pricing. Retrieved February 18, 2024, from http://www.jstor.org/stable/3003143</li>
+                    </ol>
+                </div>
+                
+                <button class="accordion">Assumptions</button>
+                <div class="panel">
+                    <ol class="model-assumptions">
+                        <li><span class="assumption-title">European-style Options:</span> The model is designed for European options, which can only be exercised at expiration. It does not apply to American options, which can be exercised at any time before expiration.</li>
+                        <li><span class="assumption-title">Log-Normal Distribution of Stock Prices:</span> The model assumes that the returns on the underlying asset are normally distributed, leading to a log-normal distribution of future stock prices. This assumption is key to deriving the model's differential equation.</li>
+                        <li><span class="assumption-title">Constant Risk-Free Rate:</span> The risk-free interest rate is known and remains constant over the life of the option.</li>
+                        <li><span class="assumption-title">Constant Volatility:</span> Assumes that the volatility of the underlying asset’s returns is constant over the option's life. This is a significant assumption, as volatility is a crucial factor in option pricing.</li>
+                        <li><span class="assumption-title">No Dividends:</span> It assumes that the underlying asset does not pay dividends during the life of the option. If dividends are expected, they are not included in the model’s pricing.</li>
+                        <li><span class="assumption-title">No Transaction Costs or Taxes:</span> Assumes that buying or selling the underlying asset or the option incurs no costs or taxes, making transactions cost-free.</li>
+                        <li><span class="assumption-title">Efficient Markets:</span> The model assumes market efficiency, meaning that market prices reflect all available information. This implies that price movements of the underlying asset are unpredictable and follow a random walk.</li>
+                        <li><span class="assumption-title">No Arbitrage:</span> Assumes the absence of arbitrage opportunities, which means that it's impossible to make a risk-free profit in the market.</li>
+                    </ol>
+                </div>
+            
+                <button class="accordion">Inputs</button>
+                <div class="panel">
+                    <ol class="model-assumptions">
+                        <li><span class="assumption-title">Spot Price of the Underlying Asset (S):</span> This is the current market price of the underlying asset, such as a stock, on which the option is based.</li>
+                        <li><span class="assumption-title">Strike Price of the Option (K):</span> The strike price is the pre-determined price at which the holder of the option can buy (in the case of a call option) or sell (in the case of a put option) the underlying asset.</li>
+                        <li><span class="assumption-title">Time to Expiration (t):</span> The time remaining until the option's expiration date, expressed in years. The time to expiration affects the option's time value, which is a component of its total value.</li>
+                        <li><span class="assumption-title">Risk-free Interest Rate (r):</span> This is the continuously compounded risk-free rate of return over the life of the option. It's typically based on the yield of government treasury securities.</li>
+                        <li><span class="assumption-title">Volatility of the Underlying Asset (σ):</span> Annual standard deviation of the underlying asset - measure of the degree to which the price of the underlying asset is expected to fluctuate over time. Volatility is a crucial determinant in the pricing of options, with higher volatility generally increasing the value of an option.</li>
+                        <li><span class="assumption-title">Dividend Yield (q):</span> In the modified version of the BSM model, the dividend yield of the underlying asset is also considered. This is particularly relevant for stocks that pay dividends. The dividend yield is the annual dividends per share divided by the share price, expressed as a percentage.</li>
+                    </ol>   
+                </div>
+            
+                <button class="accordion">Formulas</button>
+                <div class="panel">
+                    <p class="model-overview">
+                        Recognizing the limitation of the no-dividend assumption, the model was later adapted to include a continuous dividend yield. 
+                        This modification allows for the pricing of options on dividend-paying stocks or assets. In this modified version, the dividend yield 
+                        is incorporated into the model through a term, often denoted as q, which represents the continuous compounded dividend yield of the underlying asset. 
+                        This dividend yield is assumed to be known and constant over the life of the option.
+                    </p>
+                    <p class="accordion-underlined">CALL OPTION FORMULA:</p>
+                    <p>
+                        \( C = S e^{-qt} N(d_1) - K e^{-rt} N(d_2) \)
+                    </p>
+                    <p class="model-overview">
+                        where:
+                    </p>
+                    <p class="model-overview">
+                        \( C \) = Theoretical value of an European call option,
+                    </p>
+                    <p class="model-overview">
+                        \( S \) = Stock price,
+                    </p>
+                    <p class="model-overview">
+                        \( K \) = Strike price,
+                    </p>
+                    <p class="model-overview">
+                        \( e \) = Euler's Number,
+                    </p>
+                    <p class="model-overview">
+                        \( q \) = Continuously compounded dividend yield, in percent,
+                    </p>
+                    <p class="model-overview">
+                        \( t \) = Time to expiration, in years,
+                    </p>
+                    <p class="model-overview">
+                        \( r \) = Continuously compounded risk-free interest rate, in percent,
+                    </p>
+                    <p class="model-overview">
+                        \( N \) = Cumulative normal distribution function
+                    </p>
+                    <br>
+                    <p class="accordion-underlined">PUT OPTION FORMULA:</p>  
+                    <p>
+                        \( P = K e^{-rT} N(-d_2) - S e^{-qT} N(-d_1) \)
+                    </p>
+                    <p class="model-overview">
+                        where \( P \) = Theoretical value of an European put option
+                    </p>
+                    <br>
+                    <p class="accordion-underlined">d1:</p>
+                    <p>
+                        \[ d1 = \frac{\ln(\frac{S}{K}) + (r - q + \frac{\sigma^2}{2})t}{\sigma\sqrt{t}} \]
+                    </p>
+                    <p class="model-overview">
+                        where:
+                    </p>
+                    <p class="model-overview">
+                        \( \ln \) = natural logarithm,
+                    </p>
+                    <p class="model-overview">
+                        \( \sigma \) = annual standard deviation (volatility) of the underlying asset, in percent.
+                    </p>
+                    <br>
+                    <p class="accordion-underlined">d2:</p>
+                    <p>
+                        \[ d2 = d1 - \sigma\sqrt{t} \]
+                    </p>  
+                </div>
+            
+                <button class="accordion">Option Greeks</button>
+                <div class="panel">
+                    <p class="model-overview">
+                        Options Greeks are financial measures that provide insight into how various factors impact the price of an option. 
+                        Each "Greek" measures the sensitivity of the option's price to a different variables, such as underlying asset's price, 
+                        volatility, time to expiration and risk-free interest rate. Originating from mathematical finance, these risk sensitivities 
+                        are known as partial derivatives in calculus, which may be first-order or higher-order derivatives. Commonly denoted by Greek letters, 
+                        these metrics serve as a collective toolkit for traders to quantify and manage the risks associated with derivative instruments. 
+                        Understanding the Greeks allows traders to make more informed decisions by predicting how options are likely to behave in the face of 
+                        changing market conditions, thereby tailoring their strategies to either mitigate risk or capitalize on market movements.
+                    </p>
+                    <p class="accordion-underlined">DELTA:</p>
+                    <p class="model-overview">
+                        Delta(Δ) is a measure of the sensitivity of an option’s price changes relative to the changes in the underlying asset’s price. 
+                        In other words, Delta measures how option price will change if underlying price increases by $1.
+                    </p>
+                    <p class="model-overview">Call option delta:</p>
+                    <p>
+                        \( \Delta C = e^{-qt} N(d1) \)
+                    </p>
+                    <p class="model-overview">Put option delta:</p>
+                    <p>
+                        \( \Delta P = -e^{-qt} N(-d1) \)
+                    </p>
+                    <br>
+                    <p class="accordion-underlined">GAMMA:</p>
+                    <p class="model-overview">
+                        Gamma (Γ) is a measure of the delta’s change relative to the changes in the price of the underlying asset. 
+                        If the price of the underlying asset increases by $1, the option’s delta will change by the gamma amount. 
+                        Both call and put options have same gamma value. Formula for calculating Gamma is the same for both call and put options.
+                    </p>
+                    <p class="model-overview">Option gamma:</p>
+                    <p>
+                        \( \Gamma = \frac{N'(d1)e^{-qt}}{S\sigma\sqrt{t}} \)
+                    </p>
+                    <p class="model-overview">
+                        where \( N' \) = probability density function (PDF) of a standard normal distribution. 
+                    </p>
+                    <br>
+                    <p class="accordion-underlined">VEGA:</p>
+                    <p class="model-overview">
+                        Vega(ν) is an option Greek that measures the sensitivity of an option price relative to the volatility of the underlying asset. 
+                        Vega measures how option price will change if implied volatility rises by one percentage point. 
+                        Formula for calculating Vega is the same for both call and put options.
+                    </p>
+                    <p class="model-overview">Option vega*:</p>
+                    <p>
+                        \( \nu = S e^{-qt} \sqrt{t} N'(d1) \)
+                    </p>
+                    <br>
+                    <p class="accordion-underlined">THETA:</p>
+                    <p class="model-overview">
+                        Theta (θ) is a measure of the sensitivity of the option price relative to the option’s time to maturity. 
+                        When option's time to expiration decreases by one day, option's price will change by the theta amount. Theta is usually negative, 
+                        indicating the loss in value as the option approaches expiration. 
+                    </p>
+                    <p class="model-overview">Call option theta**:</p>
+                    <p>
+                        \( \Theta_C = - \frac{S e^{-qt} N'(d1) \sigma}{2\sqrt{t}} - rKe^{-rt}N(d2) + qSe^{-qt}N(d1) \)
+                    </p>
+                    <p class="model-overview">Put option theta**:</p>  
+                    <p>
+                        \( \Theta_P = - \frac{S e^{-qt} N'(d1) \sigma}{2\sqrt{t}} + rKe^{-rt}N(-d2) - qSe^{-qt}N(-d1) \)
+                    </p>
+                    <br>
+                    <p class="accordion-underlined">RHO:</p>
+                    <p class="model-overview">
+                        Rho (ρ) measures the sensitivity of the option price relative to interest rates. When risk-free rate changes by 1%, 
+                        option price will change by the rho amount. Since the interest rate typically has the smallest impact on option's price, 
+                        rho is often regarded as the least important of the option Greeks.
+                    </p>
+                    <p class="model-overview">Call option rho***:</p>
+                    <p>
+                        \( \rho_C = Kte^{-rt}N(d2) \)
+                    </p>
+                    <p class="model-overview">Put option rho***:</p>  
+                    <p>
+                        \( \rho_P = -Kte^{-rt}N(-d2) \)
+                    </p>
+                    <br>
+                    <p class="model-overview smanjeno">
+                        *The vega formula gives the sensitivity of the option to 100% change in volatility. To express vega value in the more common form 
+                        of 1% change in volatility vega must be divided by 100.
+                    </p>
+                    <p class="model-overview smanjeno">
+                        **The theta formula gives the sensitivity of the option to the passage of one year. To express theta values in the more common form 
+                        of daily decay the theta must be divided by 365.
+                    </p>
+                    <p class="model-overview smanjeno">
+                        *** The rho formula gives the sensitivity of the option to 100% change in interest rates. To express rho value in the more common form 
+                        of 1% change in interest rates rho must be divided by 100.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>      
+</div>
+{% endblock %}

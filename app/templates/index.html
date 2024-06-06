@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block title %}Home{% endblock %}
+
+{% block extra_styles %}
+    <link href="{{ url_for('static', filename='styles.css') }}" rel="stylesheet"/>
+{% endblock %}
+
+{% block content %}
+    <div class ="col text-center">
+        <h1>Option Price Calculator</h1>
+    </div>
+    <div class="button-container">
+        <button class="button-index button-primary" onclick="location.href='/black_scholes_merton'">Black-Scholes-Merton Pricing Model</button>
+        <button class="button-index button-primary" onclick="location.href='/implied_volatility'">Implied Volatility</button>
+    </div>
+{% endblock %}
