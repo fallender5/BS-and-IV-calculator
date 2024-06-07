@@ -54,15 +54,16 @@
         <div class="tablica-izgled">
         <table class="table table-hover">
             <tbody>
-                {% if data.option_type == 'call' %}
+                {% if data.option_type == 'call' or data.option_type == 'put' %}
                 <tr>
                     <th>Implied Volatility</th>
-                    <td>{{ '{:.6f}'.format(data.output_data['implied_volatility']) }}</td>
-                </tr>
-                {% elif data.option_type == 'put' %}
-                <tr>
-                    <th>Implied Volatility</th>
-                    <td>{{ '{:.6f}'.format(data.output_data['implied_volatility']) }}</td>
+                    <td>
+                        {% if data.output_data['implied_volatility'] is not none %}
+                            {{ '{:.6f}'.format(data.output_data['implied_volatility']) }}
+                        {% else %}
+                            N/A
+                        {% endif %}
+                    </td>
                 </tr>
                 {% endif %}
             </tbody>
